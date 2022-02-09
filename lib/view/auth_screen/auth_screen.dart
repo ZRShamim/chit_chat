@@ -31,8 +31,8 @@ class AuthScreen extends StatelessWidget {
           .collection('user')
           .doc(userCredential.user!.uid)
           .set({
-        'userName': username,
-        'emal': email,
+        'username': username,
+        'email': email,
       });
     } catch (e) {
       var message = e.toString().substring(e.toString().indexOf(']') + 1);

@@ -14,10 +14,13 @@ class NewMessage extends StatelessWidget {
     void _sendMessage() async {
       FocusScope.of(context).unfocus();
       final user = FirebaseAuth.instance.currentUser;
+      final userData =
+          await FirebaseFirestore.instance.collection('user').doc(user!.uid).get();
       FirebaseFirestore.instance.collection('chat').add({
         'text': _enteredMessage.value,
         'createdAt': Timestamp.now(),
-        'userId': user!.uid,
+        'userId': user.uid,
+        'username':userData['username'],
       });
 
       _controller.clear();
