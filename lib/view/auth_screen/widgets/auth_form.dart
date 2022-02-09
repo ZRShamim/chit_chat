@@ -1,3 +1,4 @@
+import 'package:chat_app/view/auth_screen/widgets/pickers/user_image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -49,6 +50,7 @@ class AuthForm extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Obx(() => !_isLogin.value? UserImagePicker() : Container()) ,
                   TextFormField(
                     key: const ValueKey('email'),
                     validator: (value) {
