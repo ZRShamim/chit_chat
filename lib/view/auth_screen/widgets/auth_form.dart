@@ -1,44 +1,64 @@
+import 'dart:io';
+
 import 'package:chat_app/view/auth_screen/widgets/pickers/user_image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AuthForm extends StatelessWidget {
-  AuthForm(this.submitFn, this.isLoading);
+  AuthForm(
+    this.submitFn,
+    this.isLoading,
+  );
 
   final bool isLoading;
   final void Function(
     String email,
     String password,
     String username,
+    File image,
     bool isLogin,
     BuildContext context,
   ) submitFn;
 
+  final _formKey = GlobalKey<FormState>();
+  final _isLogin = true.obs;
+  var _userEmail = '';
+  var _userName = '';
+  var _userPassword = '';
+  File? _userImageFile;
+
+  void _pickedImage(File image) {
+    _userImageFile = image;
+  }
+
+  void _trySubmit(BuildContext context) {
+    final isValid = _formKey.currentState!.validate();
+    FocusScope.of(context).unfocus();
+    if (_userImageFile == null && !_isLogin.value) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please pick an image.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (isValid) {
+      _formKey.currentState!.save();
+      submitFn(
+        _userEmail.trim(),
+        _userPassword.trim(),
+        _userName.trim(),
+        _userImageFile as File,
+        _isLogin.value,
+        context,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-    var _isLogin = true.obs;
-    var _userEmail = '';
-    var _userName = '';
-    var _userPassword = '';
-
-    void _trySubmit() {
-      final isValid = _formKey.currentState!.validate();
-      // FocusScope.of(context).unfocus();
-
-      if (isValid) {
-        _formKey.currentState!.save();
-        submitFn(
-          _userEmail.trim(),
-          _userPassword.trim(),
-          _userName.trim(),
-          _isLogin.value,
-          context,
-        );
-        // Use those values to send our auth request
-      }
-    }
-
     return Center(
       child: Card(
         margin: const EdgeInsets.all(20),
@@ -50,7 +70,9 @@ class AuthForm extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Obx(() => !_isLogin.value? UserImagePicker() : Container()) ,
+                  Obx(() => !_isLogin.value
+                      ? UserImagePicker(_pickedImage)
+                      : Container()),
                   TextFormField(
                     key: const ValueKey('email'),
                     validator: (value) {
@@ -111,7 +133,7 @@ class AuthForm extends StatelessWidget {
                       : Column(
                           children: [
                             ElevatedButton(
-                              onPressed: _trySubmit,
+                              onPressed: () => _trySubmit(context),
                               child: Obx(
                                 () => Text(_isLogin.value ? 'Login' : 'Signup'),
                               ),
